@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Printing Optimization</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Printing Optimization</h1>
+    <form method="POST" action="/optimize" class="grid grid-cols-2 gap-4">
+      <div>
+        <label>Client Width Size:</label>
+        <input type="float" value="4" name="client_width" class="border rounded p-1 w-full" />
+      </div>
+      <div>
+        <label>Client Length Size:</label>
+        <input type="float" value="5.25" name="client_length" class="border rounded p-1 w-full" />
+      </div>
+      <div>
+        <label>Raw Material Standard Width Size:</label>
+        <input type="float" value="28" name="raw_width" class="border rounded p-1 w-full" />
+      </div>
+      <div>
+        <label>Raw Material Standard Length Size:</label>
+        <input type="float" value="34" name="raw_length" class="border rounded p-1 w-full" />
+      </div>
+      <div>
+        <label>Gutter:</label>
+        <input type="float" value="0.25" name="gutter" class="border rounded p-1 w-full" />
+      </div>
+      <div>
+        <label>Machine Max Width:</label>
+        <input type="float" value="10" name="max_width" class="border rounded p-1 w-full" />
+      </div>
+      <div>
+        <label>Machine Max Length:</label>
+        <input type="float" value="15" name="max_length" class="border rounded p-1 w-full" />
+      </div>
+      <div class="col-span-2 text-center">
+        <button type="submit" class="bg-blue-500 text-white py-1 px-4 rounded">Submit</button>
+      </div>
+    </form>
+
+    <div id="results" class="mt-6"></div>
+  </div>
+
+  <script>
+    document.querySelector("form").onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const response = await fetch("/optimize", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      const resultsDiv = document.getElementById("results");
+      if (result.error) {
+        resultsDiv.innerHTML = `<p class='text-red-500'>${result.error}</p>`;
+      } else {
+        resultsDiv.innerHTML = `
+          <h2 class='text-xl font-bold'>Results</h2>
+          <p>Optimal Printing Size: ${result.best_size}</p>
+          <p>Number of Sheets: ${result.num_sheets}</p>
+          <p>Outs per Sheet: ${result.outs_per_sheet}</p>
+          <p>Total Outs: ${result.total_outs}</p>
+          <p>Raw Material Layout:</p>
+          <img src='/${result.raw_layout}' class='mt-2 border rounded' />
+          <p class='mt-4'>Optimal Printing Size Layout:</p>
+          <img src='/${result.print_layout}' class='mt-2 border rounded' />
+          <p class='mt-4'>Sheet Layout:</p>
+          <img src='/${result.sheet_layout}' class='mt-2 border rounded' />
+        `;
+      }
+    };
+  </script>
+</body>
+</html>
