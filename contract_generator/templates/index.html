@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contract Filler</title>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header text-center bg-primary text-white">
+            <h3>Upload CSV and DOCX Template</h3>
+        </div>
+        <div class="card-body">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">CSV File:</label>
+                    <input type="file" class="form-control" id="csvFile" name="csv_file" accept=".csv" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">DOCX Template:</label>
+                    <input type="file" class="form-control" id="docxFile" name="template" accept=".docx" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100">Upload and Generate DOCX</button>
+            </form>
+            <div id="downloadLink" class="text-center mt-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and Fetch Logic -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData();
+        formData.append('csv_file', document.getElementById('csvFile').files[0]);
+        formData.append('template', document.getElementById('docxFile').files[0]);
+
+        const response = await fetch('http://127.0.0.1:8000/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'preprocessed.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            document.getElementById('downloadLink').innerHTML = `
+                <div class="alert alert-success">All DOCX files generated successfully! Please check the "uploads" folder.</div>
+            `;
+        } else {
+            document.getElementById('downloadLink').innerHTML = `
+                <div class="alert alert-danger">Failed to upload files!</div>
+            `;
+        }
+    });
+</script>
+
+</body>
+</html>
