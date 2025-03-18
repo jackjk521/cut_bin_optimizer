@@ -13,28 +13,43 @@ if not os.path.exists('static'):
 
 # Save plot function with gutter visualization
 def save_plot(rectangles, width, height, gutter, filename):
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(10, 10))
+    
     # Expand plot limits slightly to prevent clipping
     plt.xlim(-0.5, width + 0.5)
     plt.ylim(-0.5, height + 0.5)
-    plt.xticks(range(0, int(width) + 1, 1))  # Set x-axis step to 1
-    plt.yticks(range(0, int(height) + 1, 1))  # Set y-axis step to 1
-
+    
+    # Show every second tick to reduce clutter
+    plt.xticks([i for i in range(0, int(width) + 1, 2)])
+    plt.yticks([i for i in range(0, int(height) + 1, 2)])
+    
     for rect in rectangles:
         x, y, w, h = rect
         # Draw rectangle with thicker outline
         plt.gca().add_patch(plt.Rectangle((x, y), w, h, edgecolor='blue', fill=False, linewidth=2))
-        # Add gutter as dashed lines (visualization purpose)
+        
+        # Add gutter as dashed lines (for visualization)
         plt.gca().add_patch(plt.Rectangle((x - gutter / 2, y - gutter / 2), w + gutter, h + gutter,
                                           edgecolor='gray', fill=False, linestyle='--', linewidth=1))
-        # Add label inside rectangle
-        label = f"{w} x {h}"
-        plt.text(x + w / 2, y + h / 2, label, ha='center', va='center', fontsize=8, color='black')
-
+        
+        # Add label inside rectangle in the new format
+        label = f"{w}\nx\n{h}"
+        plt.text(x + w / 2, y + h / 2, label, ha='center', va='center', fontsize=10, color='black')
+    
+    # Improve grid visibility and reduce clutter
+    plt.grid(True, which='major', color='gray', linestyle='--', linewidth=0.5)
+    plt.minorticks_off()  # Disable minor grid lines for clarity
+    
+    # Ensure equal aspect ratio
     plt.gca().set_aspect('equal', adjustable='box')
-    plt.grid(True, which='both', color='gray', linestyle='--', linewidth=0.5)
-    plt.savefig(filename, bbox_inches='tight')  # Save plot with all content visible
+    
+    # Save plot with all content visible
+    plt.tight_layout()
+    plt.savefig(filename, bbox_inches='tight')
     plt.close()
+
+    return len(rectangles)
+
 
 # Generate cut layout including gutter on all sides
 def generate_cut_layout(client_w, client_h, raw_w, raw_h, gutter):
@@ -84,7 +99,7 @@ def save_sheet_layout(client_w, client_h, raw_w, raw_h, optimal_w, optimal_h, gu
             x += optimal_w
         x = 0
         y += optimal_h
-    save_plot(rectangles, raw_w, raw_h, gutter, filename)
+    num_sheets = save_plot(rectangles, raw_w, raw_h, gutter, filename)
     return num_sheets
 
 
@@ -106,17 +121,17 @@ def optimize():
         # Generate raw material cut layout
         raw_rectangles = generate_cut_layout(client_w, client_h, raw_w, raw_h, gutter)
         raw_file = 'static/raw_layout.png'
-        save_plot(raw_rectangles, raw_w, raw_h, gutter, raw_file)
+        total_outs = save_plot(raw_rectangles, raw_w, raw_h, gutter, raw_file)
 
         # Find optimal printing size
         best_size, _ = find_optimal_printing_size(client_w, client_h, max_w, max_h, gutter)
         print_file = 'static/print_layout.png'
         print_rectangles = generate_cut_layout(client_w, client_h, best_size[0], best_size[1], gutter)
-        save_plot(print_rectangles, best_size[0], best_size[1], gutter, print_file)
+        printing_size_outs = save_plot(print_rectangles, best_size[0], best_size[1], gutter, print_file)
 
        # Generate sheet layout and calculate total outs
         sheet_file = 'static/sheet_layout.png'
-        num_sheets = save_sheet_layout(client_w, client_h, raw_w, raw_h, best_size[0], best_size[1], gutter, sheet_file)
+        standard_size_outs = save_sheet_layout(client_w, client_h, raw_w, raw_h, best_size[0], best_size[1], gutter, sheet_file)
         # total_outs = num_sheets * outs_per_sheet
 
         return jsonify({
@@ -124,7 +139,10 @@ def optimize():
             "print_layout": print_file,
             "sheet_layout": sheet_file,
             "best_size": f"{best_size[0]} x {best_size[1]}",
-            "num_sheets": num_sheets,
+            "printing_size_outs": printing_size_outs,
+            "total_outs": total_outs,
+            "standard_size_outs": standard_size_outs,
+
             # "outs_per_sheet": outs_per_sheet,
             # "total_outs": total_outs
         })

@@ -56,24 +56,30 @@
       });
       const result = await response.json();
       const resultsDiv = document.getElementById("results");
+  
       if (result.error) {
         resultsDiv.innerHTML = `<p class='text-red-500'>${result.error}</p>`;
       } else {
+        // Create a unique timestamp to bypass image caching
+        const timestamp = Date.now();
+  
         resultsDiv.innerHTML = `
           <h2 class='text-xl font-bold'>Results</h2>
           <p>Optimal Printing Size: ${result.best_size}</p>
-          <p>Number of Sheets: ${result.num_sheets}</p>
-          <p>Outs per Sheet: ${result.outs_per_sheet}</p>
+          <p>Number of FP in printing size: ${result.printing_size_outs}</p>
+          <p>Outs per Raw Material Sheet: ${result.standard_size_outs}</p>
           <p>Total Outs: ${result.total_outs}</p>
+  
           <p>Raw Material Layout:</p>
-          <img src='/${result.raw_layout}' class='mt-2 border rounded' />
+          <img src='/${result.raw_layout}?t=${timestamp}' class='mt-2 border rounded' />
           <p class='mt-4'>Optimal Printing Size Layout:</p>
-          <img src='/${result.print_layout}' class='mt-2 border rounded' />
+          <img src='/${result.print_layout}?t=${timestamp}' class='mt-2 border rounded' />
           <p class='mt-4'>Sheet Layout:</p>
-          <img src='/${result.sheet_layout}' class='mt-2 border rounded' />
+          <img src='/${result.sheet_layout}?t=${timestamp}' class='mt-2 border rounded' />
         `;
       }
     };
   </script>
+  
 </body>
 </html>
