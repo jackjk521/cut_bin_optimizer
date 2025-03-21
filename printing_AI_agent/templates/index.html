@@ -1,85 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Printing Optimization</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-</head>
-<body class="bg-gray-100">
-  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">Printing Optimization</h1>
-    <form method="POST" action="/optimize" class="grid grid-cols-2 gap-4">
-      <div>
-        <label>Client Width Size:</label>
-        <input type="float" value="4" name="client_width" class="border rounded p-1 w-full" />
-      </div>
-      <div>
-        <label>Client Length Size:</label>
-        <input type="float" value="5.25" name="client_length" class="border rounded p-1 w-full" />
-      </div>
-      <div>
-        <label>Raw Material Standard Width Size:</label>
-        <input type="float" value="28" name="raw_width" class="border rounded p-1 w-full" />
-      </div>
-      <div>
-        <label>Raw Material Standard Length Size:</label>
-        <input type="float" value="34" name="raw_length" class="border rounded p-1 w-full" />
-      </div>
-      <div>
-        <label>Gutter:</label>
-        <input type="float" value="0.25" name="gutter" class="border rounded p-1 w-full" />
-      </div>
-      <div>
-        <label>Machine Max Width:</label>
-        <input type="float" value="10" name="max_width" class="border rounded p-1 w-full" />
-      </div>
-      <div>
-        <label>Machine Max Length:</label>
-        <input type="float" value="15" name="max_length" class="border rounded p-1 w-full" />
-      </div>
-      <div class="col-span-2 text-center">
-        <button type="submit" class="bg-blue-500 text-white py-1 px-4 rounded">Submit</button>
-      </div>
-    </form>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Printing Optimization</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet" />
+  </head>
+  <body class="bg-gray-100">
+    <div class="w-full mx-auto pt-10 p-6 bg-white rounded shadow">
+      <h1 class="text-2xl font-bold mb-4">Printing Optimization</h1>
+      <form method="POST" action="/optimize" class="grid grid-cols-2 gap-4">
+        <!-- Client Sizes -->
+        <div class="col-span-2">
+          <h2 class="text-lg font-semibold mb-2">Client Sizes</h2>
+        </div>
+        <div>
+          <label>Client Width Size:</label>
+          <input
+            type="float"
+            value="4"
+            name="client_width"
+            class="border rounded p-1 w-full" />
+        </div>
+        <div>
+          <label>Client Length Size:</label>
+          <input
+            type="float"
+            value="5.25"
+            name="client_length"
+            class="border rounded p-1 w-full" />
+        </div>
+        <div class="col-span-1">
+          <label>Number of Booklets:</label>
+          <input
+            type="number"
+            value="0"
+            name="num_booklets"
+            class="border rounded p-1 w-full" />
+        </div>
+        <div class="col-span-1">
+          <label>Number of Sheets per Booklets:</label>
+          <input
+            type="number"
+            value="0"
+            name="num_shts_per_booklet"
+            class="border rounded p-1 w-full" />
+        </div>
+        <div class="col-span-1">
+          <label>Wastage Allowance in %: </label>
+          <input
+            type="number"
+            value="5"
+            name="wastage_allowance"
+            class="border rounded p-1 w-full" />
+        </div>
 
-    <div id="results" class="mt-6"></div>
-  </div>
+        <!-- Raw Material Sizes -->
+        <div class="col-span-2 mt-4">
+          <h2 class="text-lg font-semibold mb-2">Raw Material Sizes</h2>
+        </div>
+        <div>
+          <label>Raw Material Standard Width:</label>
+          <input
+            type="float"
+            value="28"
+            name="raw_width"
+            class="border rounded p-1 w-full" />
+        </div>
+        <div>
+          <label>Raw Material Standard Length:</label>
+          <input
+            type="float"
+            value="34"
+            name="raw_length"
+            class="border rounded p-1 w-full" />
+        </div>
 
-  <script>
-    document.querySelector("form").onsubmit = async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const response = await fetch("/optimize", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await response.json();
-      const resultsDiv = document.getElementById("results");
-  
-      if (result.error) {
-        resultsDiv.innerHTML = `<p class='text-red-500'>${result.error}</p>`;
-      } else {
-        // Create a unique timestamp to bypass image caching
-        const timestamp = Date.now();
-  
-        resultsDiv.innerHTML = `
+        <!-- Gutter and Pull -->
+        <div class="col-span-2 mt-4">
+          <h2 class="text-lg font-semibold mb-2">Gutter and Pull</h2>
+        </div>
+        <div class="col-span-2">
+          <label>Gutter:</label>
+          <input
+            type="float"
+            value="0.25"
+            name="gutter"
+            class="border rounded p-1 w-full" />
+        </div>
+
+        <!-- Machine Maximum Size -->
+        <div class="col-span-2 mt-4">
+          <h2 class="text-lg font-semibold mb-2">Machine Maximum Size</h2>
+        </div>
+        <div>
+          <label>Machine Max Width:</label>
+          <input
+            type="float"
+            value="10"
+            name="max_width"
+            class="border rounded p-1 w-full" />
+        </div>
+        <div>
+          <label>Machine Max Length:</label>
+          <input
+            type="float"
+            value="15"
+            name="max_length"
+            class="border rounded p-1 w-full" />
+        </div>
+
+        <div class="col-span-2 text-center mt-4">
+          <button
+            type="submit"
+            class="bg-blue-500 text-white py-1 px-4 rounded">
+            Submit
+          </button>
+        </div>
+      </form>
+
+      <div id="results" class="mt-6"></div>
+    </div>
+
+    <script>
+      document.querySelector("form").onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const response = await fetch("/optimize", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json();
+        const resultsDiv = document.getElementById("results");
+
+        if (result.error) {
+          resultsDiv.innerHTML = `<p class='text-red-500'>${result.error}</p>`;
+        } else {
+          // Create a unique timestamp to bypass image caching
+          const timestamp = Date.now();
+
+          resultsDiv.innerHTML = `
           <h2 class='text-xl font-bold'>Results</h2>
           <p>Optimal Printing Size: ${result.best_size}</p>
           <p>Number of FP in printing size: ${result.printing_size_outs}</p>
           <p>Outs per Raw Material Sheet: ${result.standard_size_outs}</p>
           <p>Total Outs: ${result.total_outs}</p>
+
+          <h2 class='text-xl font-bold'>Raw Material Usage</h2>
+          <p>Required Total Sheets: ${result.total_sheets}</p>
+          <p>Required Total Sheets with Wastage Allowance: ${result.total_w_wastage_amt}</p>
+          <p>Total Raw Materials to Use: ${result.total_raw_mat_used}</p>
   
-          <p>Raw Material Layout:</p>
-          <img src='/${result.raw_layout}?t=${timestamp}' class='mt-2 border rounded' />
-          <p class='mt-4'>Optimal Printing Size Layout:</p>
-          <img src='/${result.print_layout}?t=${timestamp}' class='mt-2 border rounded' />
-          <p class='mt-4'>Sheet Layout:</p>
-          <img src='/${result.sheet_layout}?t=${timestamp}' class='mt-2 border rounded' />
+          <div class="flex flex-wrap gap-4 justify-between mt-4">
+            <div class="flex-1 min-w-[300px]">
+              <p class="mb-2">Raw Material Layout:</p>
+              <img src='/${result.raw_layout}?t=${timestamp}' class='w-full border rounded' />
+            </div>
+            <div class="flex-1 min-w-[300px]">
+              <p class="mb-2">Optimal Printing Size Layout:</p>
+              <img src='/${result.print_layout}?t=${timestamp}' class='w-full border rounded' />
+            </div>
+            <div class="flex-1 min-w-[300px]">
+              <p class="mb-2">Sheet Layout:</p>
+              <img src='/${result.sheet_layout}?t=${timestamp}' class='w-full border rounded' />
+            </div>
+          </div>
         `;
-      }
-    };
-  </script>
-  
-</body>
+        }
+      };
+    </script>
+  </body>
 </html>

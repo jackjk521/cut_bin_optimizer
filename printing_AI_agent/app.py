@@ -74,10 +74,10 @@ def find_optimal_printing_size(client_w, client_h, max_w, max_h, gutter, step=0.
     max_outs = 0
     effective_w = client_w + gutter
     effective_h = client_h + gutter
-    for w in range(int(max_w / step)):
-        for h in range(int(max_h / step)):
-            pw = (w + 1) * step
-            ph = (h + 1) * step
+    for w in range(int(max_w / gutter)):
+        for h in range(int(max_h / gutter)):
+            pw = (w + 1) * gutter
+            ph = (h + 1) * gutter
             if pw > max_w or ph > max_h:
                 continue
             outs = (pw // effective_w) * (ph // effective_h)
@@ -112,6 +112,9 @@ def optimize():
     try:
         client_w = float(request.form['client_width'])
         client_h = float(request.form['client_length'])
+        num_booklets = float(request.form['num_booklets'])
+        num_shts_per_booklet = float(request.form['num_shts_per_booklet'])
+        wastage_allowance = float(request.form['wastage_allowance'])
         raw_w = float(request.form['raw_width'])
         raw_h = float(request.form['raw_length'])
         gutter = float(request.form['gutter'])
@@ -134,6 +137,11 @@ def optimize():
         standard_size_outs = save_sheet_layout(client_w, client_h, raw_w, raw_h, best_size[0], best_size[1], gutter, sheet_file)
         # total_outs = num_sheets * outs_per_sheet
 
+        # Compute for number of sheets
+        total_sheets = num_booklets *  num_shts_per_booklet
+        total_w_wastage_amt = total_sheets * (1 + (wastage_allowance / 100)) 
+        total_raw_mat_used = round(total_w_wastage_amt/total_outs)
+
         return jsonify({
             "raw_layout": raw_file,
             "print_layout": print_file,
@@ -142,6 +150,10 @@ def optimize():
             "printing_size_outs": printing_size_outs,
             "total_outs": total_outs,
             "standard_size_outs": standard_size_outs,
+
+            "total_sheets": total_sheets,
+            "total_w_wastage_amt": total_w_wastage_amt,
+            "total_raw_mat_used": total_raw_mat_used
 
             # "outs_per_sheet": outs_per_sheet,
             # "total_outs": total_outs
